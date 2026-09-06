@@ -1,0 +1,38 @@
+# Maven build output
+target/
+
+# Generated inference results
+output/*
+!output/.gitkeep
+
+# Downloaded/local model files (models are intentionally not committed)
+models/*
+!models/.gitkeep
+*.onnx
+*.onnx.data
+*.pdmodel
+*.pdiparams
+
+# Local test images; keep the canonical fixture in this repository
+test.*
+!test.png
+
+# IntelliJ IDEA and Java tooling local state
+.idea/workspace.xml
+.idea/jarRepositories.xml
+.idea/httpRequests/
+.idea/dataSources/
+.idea/shelf/
+*.iml
+out/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+hs_err_pid*
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+desktop.ini
