@@ -17,7 +17,7 @@ public final class Main {
 
     public static void main(String[] args) throws Exception {
         Path model = Path.of(args.length > 0 ? args[0] : "models/inference.onnx");
-        Path image = Path.of(args.length > 1 ? args[1] : "test.png");
+        Path image = Path.of(args.length > 1 ? args[1] : "img.png");
         Path outputDir = Path.of(args.length > 2 ? args[2] : "output");
         float threshold = args.length > 3 ? Float.parseFloat(args[3]) : 0.5f;
         int intra = args.length > 4 ? Integer.parseInt(args[4]) : 2;
