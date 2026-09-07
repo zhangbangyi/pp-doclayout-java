@@ -1,0 +1,24 @@
+{
+  "model": "PP-DocLayoutV3",
+  "image": {"width": 1920, "height": 1065},
+  "timingMs": {
+    "preprocess": 84.3775,
+    "inference": 1420.4634,
+    "postprocess": 3.2051,
+    "total": 1508.046
+  },
+  "boxes": [
+    {"classId": 13, "label": "header_image", "score": 0.465454, "box": [15.160303, 6.719151, 769.937805, 29.091101], "modelOrder": 31, "order": -1},
+    {"classId": 12, "label": "header", "score": 0.402130, "box": [15.160303, 6.719151, 769.937805, 29.091101], "modelOrder": 31, "order": -1},
+    {"classId": 12, "label": "header", "score": 0.710660, "box": [18.069019, 49.533211, 394.756897, 79.859291], "modelOrder": 70, "order": -1},
+    {"classId": 12, "label": "header", "score": 0.777602, "box": [1581.884644, 50.543301, 1902.761475, 78.283478], "modelOrder": 82, "order": -1},
+    {"classId": 14, "label": "image", "score": 0.722419, "box": [15.990658, 106.939240, 1435.961670, 997.064392], "modelOrder": 109, "order": -1},
+    {"classId": 24, "label": "vision_footnote", "score": 0.631488, "box": [34.055412, 1017.495911, 511.524017, 1042.386841], "modelOrder": 181, "order": -1},
+    {"classId": 7, "label": "figure_title", "score": 0.593529, "box": [1464.052490, 110.326889, 1576.918457, 133.039841], "modelOrder": 192, "order": -1},
+    {"classId": 21, "label": "table", "score": 0.792350, "box": [1468.246948, 149.268600, 1888.924438, 455.448120], "modelOrder": 197, "order": -1},
+    {"classId": 22, "label": "text", "score": 0.696090, "box": [1464.544922, 708.891724, 1887.606201, 738.703003], "modelOrder": 243, "order": 1},
+    {"classId": 7, "label": "figure_title", "score": 0.358061, "box": [1465.203613, 668.076660, 1541.666504, 691.001221], "modelOrder": 249, "order": -1},
+    {"classId": 22, "label": "text", "score": 0.693136, "box": [1465.837891, 750.115479, 1886.205200, 779.218567], "modelOrder": 264, "order": 2},
+    {"classId": 22, "label": "text", "score": 0.687842, "box": [1465.124878, 790.120911, 1885.819580, 816.879211], "modelOrder": 289, "order": 3}
+  ]
+}

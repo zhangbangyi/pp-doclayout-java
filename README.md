@@ -1,6 +1,6 @@
 # PP-DocLayoutV3 Java Demo
 
-这是一个基于 Java 17、Spring Boot 和 ONNX Runtime 的 PP-DocLayoutV3 单体 Web 应用，保留命令行推理、结果 JSON、框线图片和可视化 HTML 页面。
+这是一个基于 Java 17、Spring Boot 和 ONNX Runtime 的 PP-DocLayoutV3 单体 Web 应用。启动后可在浏览器上传图片进行版面识别，页面直接展示原图、检测框和识别明细。
 
 ## 项目结构
 
@@ -38,9 +38,9 @@ This project targets the actual model structure inspected from the uploaded file
       scale_factor  float [1, 2]
 
     Outputs:
-      fetch_name_0  float [N, 7]
-      fetch_name_1  int32 [N]
-      fetch_name_2  int32 [N, 200, 200]
+      fetch_name_0  float [N, 7]       # [class, score, x1, y1, x2, y2, model_order]
+      fetch_name_1  int32 [batch]      # bbox_num, not reading order
+      fetch_name_2  int32 [N, 200, 200] # mask
 
 The official `inference.yml` uses `NormalizeImage` with scale `1/255`, mean `0`,
 and std `1`, then permutes the image to NCHW.
@@ -69,9 +69,13 @@ Recommended image types:
 
     mvn spring-boot:run
 
-服务启动成功后会自动使用系统默认浏览器打开：
+服务启动成功后会自动使用系统默认浏览器打开上传识别页面：
 
     http://localhost:8098/
+
+选择或拖拽 PNG/JPG/JPEG 图片后，设置置信度阈值并点击“开始识别”。模型在首次识别请求时加载，默认使用：
+
+    models/inference.onnx
 
 需要在无图形界面的环境中运行时，可关闭自动打开浏览器：
 
@@ -87,7 +91,7 @@ First inspect and infer:
 Or:
 
     mvn -q exec:java -Dexec.mainClass=com.example.doclayout.cli.Main \
-      -Dexec.args="models/inference.onnx test.png output 0.5 2 1"
+      -Dexec.args="models/inference.onnx test.png output 0.3 2 1"
 
 Outputs:
 
@@ -118,11 +122,11 @@ The thread defaults are intentionally conservative for CPU-heavy video applicati
 
 ## Known limitation in this test stage
 
-`fetch_name_0` is decoded as Paddle's NMS-style seven-column result:
+模型固定接收 800×800 输入，预处理必须与官方配置一致：直接缩放
+（`keep_ratio=false`）、三次插值、`1/255` 归一化及 NCHW 排列。不能把原图尺寸直接
+送入此 ONNX，也不应改为等比留白。
 
-    [class_id, score, x1, y1, x2, y2, batch_id]
-
-`fetch_name_1` is exposed as the per-result order array.
-`fetch_name_2` is intentionally not converted to polygons yet; the visualization uses the detected bounding box.
+当前已按第七列 `model_order` 排列区域，并为正文生成连续阅读顺序；
+`fetch_name_2` 的掩码尚未转换为多边形，展示仍使用矩形框。
 
 Before SDK packaging, validate these semantics against a real inference result and PaddleOCR reference output.

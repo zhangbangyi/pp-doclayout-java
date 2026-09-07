@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PP-DocLayoutV3</title>
+    <title>PP-DocLayoutV3 版面识别</title>
     <style>
         :root {
             color-scheme: light;
@@ -21,9 +21,9 @@
         }
 
         main {
-            max-width: 1040px;
+            max-width: 1440px;
             margin: 0 auto;
-            padding: 40px 28px 56px;
+            padding: 30px 28px 48px;
         }
 
         header {
@@ -31,24 +31,24 @@
             justify-content: space-between;
             align-items: flex-end;
             gap: 24px;
-            padding-bottom: 24px;
+            padding-bottom: 22px;
             border-bottom: 1px solid #dce3e9;
         }
 
         h1 {
             margin: 0;
-            font-size: 30px;
+            font-size: 28px;
             font-weight: 700;
             letter-spacing: 0;
         }
 
-        p {
-            margin: 9px 0 0;
-            color: #617080;
-            line-height: 1.6;
+        .subtitle {
+            margin: 8px 0 0;
+            color: #647386;
+            font-size: 14px;
         }
 
-        .state {
+        .status {
             display: flex;
             align-items: center;
             gap: 9px;
@@ -65,72 +65,243 @@
             box-shadow: 0 0 0 4px #24955d1f;
         }
 
-        section {
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 18px;
-            margin-top: 28px;
-        }
-
-        article {
+        .toolbar {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 18px 20px;
+            margin-top: 22px;
             background: #fff;
             border: 1px solid #dce3e9;
             border-radius: 8px;
-            padding: 22px;
         }
 
-        h2 {
-            margin: 0;
-            font-size: 17px;
-            font-weight: 650;
+        .dropzone {
+            flex: 1 1 420px;
+            min-height: 86px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            border: 1px dashed #aab7c4;
+            border-radius: 7px;
+            background: #fafcfd;
+            color: #536477;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .15s, background .15s;
         }
 
-        .path {
-            display: block;
-            margin-top: 16px;
-            padding: 13px 14px;
-            border-left: 3px solid #1f7a4d;
+        .dropzone:hover, .dropzone.dragover {
+            border-color: #1f7a4d;
             background: #f1f8f4;
             color: #174c33;
-            font-family: Consolas, monospace;
-            font-size: 14px;
-            overflow-wrap: anywhere;
         }
 
-        ul {
-            margin: 16px 0 0;
-            padding-left: 20px;
-            color: #4f5f6f;
-            line-height: 1.9;
+        .dropzone strong {
+            color: #174c33;
         }
 
-        code {
-            font-family: Consolas, monospace;
-            font-size: 0.92em;
-            color: #23476a;
+        #fileInput {
+            display: none;
         }
 
-        footer {
-            margin-top: 24px;
-            color: #718093;
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .threshold {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #5f6f80;
             font-size: 13px;
         }
 
-        @media (max-width: 720px) {
+        input[type=range] {
+            width: 130px;
+            accent-color: #1f7a4d;
+        }
+
+        .button {
+            min-height: 40px;
+            padding: 0 18px;
+            border: 0;
+            border-radius: 6px;
+            background: #1f7a4d;
+            color: #fff;
+            font: inherit;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: #17613c;
+        }
+
+        .button:disabled {
+            background: #aeb9c3;
+            cursor: wait;
+        }
+
+        .message {
+            min-height: 20px;
+            margin-top: 14px;
+            color: #a23a34;
+            font-size: 13px;
+        }
+
+        .message:empty {
+            display: none;
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.visible {
+            display: block;
+        }
+
+        .stats {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 22px 0 16px;
+        }
+
+        .stat {
+            min-width: 124px;
+            padding: 11px 14px;
+            background: #fff;
+            border: 1px solid #dce3e9;
+            border-radius: 7px;
+        }
+
+        .stat b {
+            display: block;
+            font-size: 18px;
+        }
+
+        .stat span {
+            display: block;
+            margin-top: 3px;
+            color: #718093;
+            font-size: 12px;
+        }
+
+        .compare {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 18px;
+        }
+
+        .panel, .details {
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid #dce3e9;
+            border-radius: 8px;
+        }
+
+        .panel-head, .details-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 13px 16px;
+            border-bottom: 1px solid #e7ebef;
+            font-size: 14px;
+            font-weight: 650;
+        }
+
+        .panel-head small {
+            color: #7d8b9a;
+            font-weight: 400;
+        }
+
+        .stage {
+            min-height: 380px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 16px;
+            background: #e9edf1;
+        }
+
+        .stage img {
+            display: block;
+            max-width: 100%;
+            max-height: 620px;
+            height: auto;
+            object-fit: contain;
+            box-shadow: 0 2px 8px #17202a20;
+        }
+
+        .details {
+            margin-top: 18px;
+        }
+
+        .table-wrap {
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #edf0f3;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #fafbfc;
+            color: #697586;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .score {
+            font-variant-numeric: tabular-nums;
+            font-weight: 650;
+        }
+
+        .empty {
+            padding: 28px;
+            color: #697586;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
             main {
-                padding: 28px 16px 40px;
+                padding: 22px 14px 36px;
             }
 
             header {
                 display: block;
             }
 
-            .state {
-                margin-top: 16px;
+            .status {
+                margin-top: 15px;
             }
 
-            section {
+            .compare {
                 grid-template-columns: 1fr;
+            }
+
+            .stage {
+                min-height: 260px;
             }
         }
     </style>
@@ -138,28 +309,159 @@
 <body>
 <main>
     <header>
-        <div>
-            <h1>PP-DocLayoutV3</h1>
-            <p>版面识别服务</p>
-        </div>
-        <div class="state"><span class="dot"></span>服务运行中</div>
+        <div><h1>PP-DocLayoutV3 版面识别</h1>
+            <p class="subtitle">上传文档图片，在线查看版面检测框和识别明细</p></div>
+        <div class="status"><span class="dot"></span>服务运行中</div>
     </header>
-    <section>
-        <article>
-            <h2>Web 入口</h2>
-            <p>Spring Boot 已提供根路径页面。模型推理命令行入口与原有输出流程均保持可用。</p>
-            <span class="path">http://localhost:8098/</span>
-        </article>
-        <article>
-            <h2>本地资源</h2>
-            <ul>
-                <li>模型：<code>models/inference.onnx</code></li>
-                <li>输入图像：<code>img.png</code></li>
-                <li>推理结果：<code>output/index.html</code></li>
-            </ul>
-        </article>
+    <section class="toolbar">
+        <label class="dropzone" id="dropzone" for="fileInput">
+            <span id="fileLabel"><strong>选择图片</strong>，或将图片拖拽到这里<br><small>支持 PNG、JPG、JPEG，最大 20 MB</small></span>
+        </label>
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/jpg">
+        <div class="controls">
+            <label class="threshold" for="threshold">置信度 <input id="threshold" type="range" min="0" max="1"
+                                                                   step="0.05" value="0.3">
+                <output id="thresholdValue">0.30</output>
+            </label>
+            <button class="button" id="detectButton" type="button" disabled>开始识别</button>
+        </div>
     </section>
-    <footer>关闭 Spring Boot 进程后，Web 服务将停止。</footer>
+    <div class="message" id="message" role="alert"></div>
+    <section class="results" id="results">
+        <div class="stats">
+            <div class="stat"><b id="boxCount">0</b><span>识别框</span></div>
+            <div class="stat"><b id="inferenceTime">0 ms</b><span>推理耗时</span></div>
+            <div class="stat"><b id="imageSize">-</b><span>原图尺寸</span></div>
+        </div>
+        <div class="compare">
+            <article class="panel">
+                <div class="panel-head"><span>原图</span><small>输入图片</small></div>
+                <div class="stage"><img id="originalImage" alt="上传的原图"></div>
+            </article>
+            <article class="panel">
+                <div class="panel-head"><span>识别结果</span><small>带框线与标签</small></div>
+                <div class="stage"><img id="annotatedImage" alt="版面识别结果"></div>
+            </article>
+        </div>
+        <section class="details">
+            <div class="details-head">识别明细</div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>类别</th>
+                        <th>置信度</th>
+                        <th>坐标</th>
+                    </tr>
+                    </thead>
+                    <tbody id="detailsBody"></tbody>
+                </table>
+                <div class="empty" id="emptyDetails">没有达到当前置信度阈值的识别框</div>
+            </div>
+        </section>
+    </section>
 </main>
+<!-- 前端主流程：选择/拖拽图片后调用 /api/detect，再把服务端返回的 Base64 图片和结果表格渲染出来。 -->
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const dropzone = document.getElementById('dropzone');
+    const fileLabel = document.getElementById('fileLabel');
+    const detectButton = document.getElementById('detectButton');
+    const threshold = document.getElementById('threshold');
+    const thresholdValue = document.getElementById('thresholdValue');
+    const message = document.getElementById('message');
+    // 当前待识别文件只保存在浏览器内存中，点击“开始识别”时才上传。
+    let selectedFile = null;
+    threshold.addEventListener('input', () => {
+        thresholdValue.value = Number(threshold.value).toFixed(2);
+        thresholdValue.textContent = thresholdValue.value;
+    });
+    fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
+    ['dragenter', 'dragover'].forEach(name => dropzone.addEventListener(name, event => {
+        event.preventDefault();
+        dropzone.classList.add('dragover');
+    }));
+    ['dragleave', 'drop'].forEach(name => dropzone.addEventListener(name, event => {
+        event.preventDefault();
+        dropzone.classList.remove('dragover');
+    }));
+    dropzone.addEventListener('drop', event => setFile(event.dataTransfer.files[0]));
+    detectButton.addEventListener('click', detect);
+
+    // 校验文件类型和大小，并同步更新按钮状态及文件提示文字。
+    function setFile(file) {
+        message.textContent = '';
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            message.textContent = '请选择 PNG 或 JPEG 图片';
+            return;
+        }
+        if (file.size > 20 * 1024 * 1024) {
+            message.textContent = '图片大小不能超过 20 MB';
+            return;
+        }
+        selectedFile = file;
+        fileLabel.innerHTML = '<strong>' + escapeHtml(file.name) + '</strong><br><small>' + formatBytes(file.size) + '，已准备识别</small>';
+        detectButton.disabled = false;
+    }
+
+    // 通过 multipart/form-data 调用后端接口；请求期间锁定按钮以避免重复推理。
+    async function detect() {
+        if (!selectedFile) return;
+        const form = new FormData();
+        form.append('image', selectedFile);
+        form.append('threshold', threshold.value);
+        detectButton.disabled = true;
+        detectButton.textContent = '识别中...';
+        message.textContent = '';
+        try {
+            const response = await fetch('/api/detect', {method: 'POST', body: form});
+            const payload = await response.json();
+            if (!response.ok) throw new Error(payload.message || '识别失败');
+            renderResult(payload);
+        } catch (error) {
+            message.textContent = error.message || '识别失败，请检查模型文件和图片';
+        } finally {
+            detectButton.disabled = false;
+            detectButton.textContent = '开始识别';
+        }
+    }
+
+    // 将后端返回的图片、统计信息和检测框列表写入结果区域。
+    function renderResult(payload) {
+        const result = payload.result;
+        document.getElementById('originalImage').src = payload.originalImage;
+        document.getElementById('annotatedImage').src = payload.annotatedImage;
+        document.getElementById('boxCount').textContent = result.boxes.length;
+        document.getElementById('inferenceTime').textContent = (result.inferenceNanos / 1000000).toFixed(1) + ' ms';
+        document.getElementById('imageSize').textContent = result.originalWidth + ' × ' + result.originalHeight;
+        const body = document.getElementById('detailsBody');
+        body.innerHTML = '';
+        document.getElementById('emptyDetails').style.display = result.boxes.length ? 'none' : 'block';
+        result.boxes.forEach((box, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td>' + (index + 1) + '</td><td>' + escapeHtml(box.label) + '</td><td class="score">' + box.score.toFixed(3) + '</td><td>[' + [box.x1, box.y1, box.x2, box.y2].map(value => value.toFixed(1)).join(', ') + ']</td>';
+            body.appendChild(row);
+        });
+        document.getElementById('results').classList.add('visible');
+    }
+
+    // 类别名称来自模型输出，插入表格前必须转义 HTML 特殊字符。
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[char]));
+    }
+
+    // 文件提示使用更易读的 KB/MB 单位。
+    function formatBytes(value) {
+        return value < 1024 * 1024 ? (value / 1024).toFixed(1) + ' KB' : (value / 1024 / 1024).toFixed(1) + ' MB';
+    }
+</script>
 </body>
 </html>

@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 
 @SpringBootTest(
         classes = DocLayoutApplication.class,
@@ -27,6 +28,14 @@ class HomeControllerTest {
         ResponseEntity<String> response = restTemplate.getForEntity("http://localhost:" + port + "/", String.class);
 
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-        assertThat(response.getBody()).contains("PP-DocLayoutV3").contains("服务运行中");
+        assertThat(response.getBody()).contains("PP-DocLayoutV3").contains("选择图片").contains("/api/detect");
+    }
+
+    @Test
+    void detectionRequiresAnImageUpload() {
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "http://localhost:" + port + "/api/detect", null, String.class);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(415);
     }
 }

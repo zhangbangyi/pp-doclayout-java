@@ -2,15 +2,21 @@ package com.example.doclayout.cli;
 
 import com.example.doclayout.core.OnnxLayoutDetector;
 import com.example.doclayout.model.LayoutResult;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
 
+/**
+ * 命令行基准测试入口，用预热和多次采样统计推理耗时。
+ */
 public final class BenchmarkMain {
-    private BenchmarkMain() {}
+    private BenchmarkMain() {
+    }
 
     public static void main(String[] args) throws Exception {
+        // warmup 用于摊平首次执行时的 JIT、线程池和 native 初始化开销。
         Path model = Path.of(args.length > 0 ? args[0] : "models/inference.onnx");
         Path image = Path.of(args.length > 1 ? args[1] : "test.png");
         int warmup = args.length > 2 ? Integer.parseInt(args[2]) : 3;
@@ -19,8 +25,7 @@ public final class BenchmarkMain {
         int inter = args.length > 5 ? Integer.parseInt(args[5]) : 1;
 
         if (!java.nio.file.Files.isRegularFile(image)) {
-            throw new IllegalArgumentException("图片文件不存在: " + image.toAbsolutePath()
-                    + "。请传入图片路径，例如: models/inference.onnx test.png 3 10 2 1");
+            throw new IllegalArgumentException("图片文件不存在: " + image.toAbsolutePath() + "。请传入图片路径，例如: models/inference.onnx test.png 3 10 2 1");
         }
         BufferedImage img;
         try {
@@ -32,20 +37,19 @@ public final class BenchmarkMain {
             throw new IllegalArgumentException("不支持的图片格式或图片内容损坏: " + image.toAbsolutePath());
         }
         try (OnnxLayoutDetector detector = new OnnxLayoutDetector(model, intra, inter)) {
-            for (int i = 0; i < warmup; i++) detector.detect(img, 0.5f);
+            // 预热结果不计入统计，正式采样使用与 Web 默认值一致的 0.3 阈值。
+            for (int i = 0; i < warmup; i++) detector.detect(img, 0.3f);
             long sum = 0;
             long min = Long.MAX_VALUE;
             long max = Long.MIN_VALUE;
             for (int i = 0; i < runs; i++) {
-                LayoutResult r = detector.detect(img, 0.5f);
+                LayoutResult r = detector.detect(img, 0.3f);
                 long ns = r.totalNanos();
                 sum += ns;
                 min = Math.min(min, ns);
                 max = Math.max(max, ns);
             }
-            System.out.printf(java.util.Locale.ROOT,
-                    "runs=%d avgMs=%.2f minMs=%.2f maxMs=%.2f%n",
-                    runs, sum / (runs * 1e6), min / 1e6, max / 1e6);
+            System.out.printf(java.util.Locale.ROOT, "runs=%d avgMs=%.2f minMs=%.2f maxMs=%.2f%n", runs, sum / (runs * 1e6), min / 1e6, max / 1e6);
         }
     }
 }
