@@ -7,27 +7,33 @@ import com.example.doclayout.model.LayoutResult;
 import com.example.doclayout.output.HtmlWriter;
 import com.example.doclayout.output.JsonWriter;
 import com.example.doclayout.output.Visualizer;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
 
+/**
+ * 命令行单图推理入口：检查模型、执行识别并输出 JSON/图片/HTML 报告。
+ */
 public final class Main {
-    private Main() {}
+    private Main() {
+    }
 
     public static void main(String[] args) throws Exception {
+        // 参数顺序与 README 保持一致，未提供时使用项目内的默认路径和线程数。
         Path model = Path.of(args.length > 0 ? args[0] : "models/inference.onnx");
-        Path image = Path.of(args.length > 1 ? args[1] : "test.png");
+        Path image = Path.of(args.length > 1 ? args[1] : "img.png");
         Path outputDir = Path.of(args.length > 2 ? args[2] : "output");
-        float threshold = args.length > 3 ? Float.parseFloat(args[3]) : 0.5f;
+        float threshold = args.length > 3 ? Float.parseFloat(args[3]) : 0.3f;
         int intra = args.length > 4 ? Integer.parseInt(args[4]) : 2;
         int inter = args.length > 5 ? Integer.parseInt(args[5]) : 1;
 
+        // 先打印模型签名，便于在真正推理前发现输入输出不匹配。
         ModelInspector.inspect(model);
 
         if (!java.nio.file.Files.isRegularFile(image)) {
-            throw new IllegalArgumentException("图片文件不存在: " + image.toAbsolutePath()
-                    + "。请传入图片路径，例如: models/inference.onnx test.png output");
+            throw new IllegalArgumentException("图片文件不存在: " + image.toAbsolutePath() + "。请传入图片路径，例如: models/inference.onnx test.png output");
         }
         BufferedImage input;
         try {
@@ -41,21 +47,16 @@ public final class Main {
         System.out.println("image=" + input.getWidth() + "x" + input.getHeight());
 
         try (OnnxLayoutDetector detector = new OnnxLayoutDetector(model, intra, inter)) {
+            // detector 使用 try-with-resources，确保进程退出前关闭 ONNX Runtime Session。
             LayoutResult result = detector.detect(input, threshold);
             System.out.println("\n========== RESULT ==========");
             System.out.println("boxes=" + result.boxes().size());
             for (LayoutBox b : result.boxes()) {
-                System.out.printf(java.util.Locale.ROOT,
-                        "%s score=%.4f box=[%.1f,%.1f,%.1f,%.1f] order=%d%n",
-                        b.label(), b.score(), b.x1(), b.y1(), b.x2(), b.y2(), b.order());
+                System.out.printf(java.util.Locale.ROOT, "%s score=%.4f box=[%.1f,%.1f,%.1f,%.1f] order=%d%n", b.label(), b.score(), b.x1(), b.y1(), b.x2(), b.y2(), b.order());
             }
-            System.out.printf(java.util.Locale.ROOT,
-                    "timing(ms): preprocess=%.2f inference=%.2f postprocess=%.2f total=%.2f%n",
-                    result.preprocessNanos() / 1e6,
-                    result.inferenceNanos() / 1e6,
-                    result.postprocessNanos() / 1e6,
-                    result.totalNanos() / 1e6);
+            System.out.printf(java.util.Locale.ROOT, "timing(ms): preprocess=%.2f inference=%.2f postprocess=%.2f total=%.2f%n", result.preprocessNanos() / 1e6, result.inferenceNanos() / 1e6, result.postprocessNanos() / 1e6, result.totalNanos() / 1e6);
 
+            // 同时生成机器可读 JSON、带框图片和可直接打开的 HTML 报告。
             JsonWriter.write(result, outputDir.resolve("result.json"));
             Visualizer.draw(input, result, outputDir.resolve("result.jpg"));
             BufferedImage annotated = ImageIO.read(outputDir.resolve("result.jpg").toFile());

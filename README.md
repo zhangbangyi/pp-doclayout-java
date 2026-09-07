@@ -1,15 +1,18 @@
 # PP-DocLayoutV3 Java Demo
 
-这是一个基于 Java 17 和 ONNX Runtime 的 PP-DocLayoutV3 推理示例项目，包含命令行推理、结果 JSON、框线图片和可视化 HTML 页面。
+这是一个基于 Java 17、Spring Boot 和 ONNX Runtime 的 PP-DocLayoutV3 单体 Web 应用。启动后可在浏览器上传图片进行版面识别，页面直接展示原图、检测框和识别明细。
 
 ## 项目结构
 
 ```text
 src/main/java/com/example/doclayout/
+  DocLayoutApplication.java         Spring Boot 启动入口
   cli/                         命令行入口（Main、BenchmarkMain）
   core/                        ONNX 推理、模型检查、图像预处理
   model/                       版面框、识别结果、标签领域对象
   output/                      JSON、框线图片和 HTML 报告输出
+  web/                         Web 首页与默认浏览器启动逻辑
+src/main/resources/static/     Web 首页 index.html
 src/test/java/                 与生产包结构对应的单元测试
 models/                        本地模型目录（模型文件不提交到 Git）
 output/                        推理生成目录（自动生成，不提交到 Git）
@@ -35,9 +38,9 @@ This project targets the actual model structure inspected from the uploaded file
       scale_factor  float [1, 2]
 
     Outputs:
-      fetch_name_0  float [N, 7]
-      fetch_name_1  int32 [N]
-      fetch_name_2  int32 [N, 200, 200]
+      fetch_name_0  float [N, 7]       # [class, score, x1, y1, x2, y2, model_order]
+      fetch_name_1  int32 [batch]      # bbox_num, not reading order
+      fetch_name_2  int32 [N, 200, 200] # mask
 
 The official `inference.yml` uses `NormalizeImage` with scale `1/255`, mean `0`,
 and std `1`, then permutes the image to NCHW.
@@ -60,7 +63,25 @@ Recommended image types:
 - report/document page
 - screenshot containing title, text, table and image
 
-## Run
+## Run Web application
+
+启动 Web 服务：
+
+    mvn spring-boot:run
+
+服务启动成功后会自动使用系统默认浏览器打开上传识别页面：
+
+    http://localhost:8098/
+
+选择或拖拽 PNG/JPG/JPEG 图片后，设置置信度阈值并点击“开始识别”。模型在首次识别请求时加载，默认使用：
+
+    models/inference.onnx
+
+需要在无图形界面的环境中运行时，可关闭自动打开浏览器：
+
+    mvn spring-boot:run -Dspring-boot.run.arguments="--app.browser.auto-open=false"
+
+## Run command-line inference
 
 First inspect and infer:
 
@@ -70,7 +91,7 @@ First inspect and infer:
 Or:
 
     mvn -q exec:java -Dexec.mainClass=com.example.doclayout.cli.Main \
-      -Dexec.args="models/inference.onnx test.png output 0.5 2 1"
+      -Dexec.args="models/inference.onnx test.png output 0.3 2 1"
 
 Outputs:
 
@@ -101,11 +122,24 @@ The thread defaults are intentionally conservative for CPU-heavy video applicati
 
 ## Known limitation in this test stage
 
-`fetch_name_0` is decoded as Paddle's NMS-style seven-column result:
+模型固定接收 800×800 输入，预处理必须与官方配置一致：直接缩放
+（`keep_ratio=false`）、三次插值、`1/255` 归一化及 NCHW 排列。不能把原图尺寸直接
+送入此 ONNX，也不应改为等比留白。
 
-    [class_id, score, x1, y1, x2, y2, batch_id]
+当前已按第七列 `model_order` 排列区域，并为正文生成连续阅读顺序；
+`fetch_name_2` 的掩码尚未转换为多边形，展示仍使用矩形框。
 
-`fetch_name_1` is exposed as the per-result order array.
-`fetch_name_2` is intentionally not converted to polygons yet; the visualization uses the detected bounding box.
+## 区域感知空间关系
+
+每次生成 `LayoutResult` 时，系统会按 `boxes` 下标自动构建 `spatialRelations`。
+关系图提供有向的 `LEFT_OF`、`RIGHT_OF`、`ABOVE`、`BELOW`、`CONTAINS`、`INSIDE`、
+`OVERLAPS` 和 `ADJACENT_TO` 边，并携带关系分数与边界间距；Web 响应和
+`output/result.json` 都会包含该数组。关系推断阈值可通过
+`new SpatialRelationConfig(iou, axisOverlap, adjacencyGap)` 调整，默认值为
+`0.10`、`0.20`、`0.05`。
+
+需要独立执行关系分析或取得关系驱动阅读顺序时，可使用
+`com.example.doclayout.core.RegionAwareDataOptimizer`。它只返回新的不可变视图，
+不会修改模型检测框或 OCR 结果。
 
 Before SDK packaging, validate these semantics against a real inference result and PaddleOCR reference output.
