@@ -129,4 +129,17 @@ The thread defaults are intentionally conservative for CPU-heavy video applicati
 当前已按第七列 `model_order` 排列区域，并为正文生成连续阅读顺序；
 `fetch_name_2` 的掩码尚未转换为多边形，展示仍使用矩形框。
 
+## 区域感知空间关系
+
+每次生成 `LayoutResult` 时，系统会按 `boxes` 下标自动构建 `spatialRelations`。
+关系图提供有向的 `LEFT_OF`、`RIGHT_OF`、`ABOVE`、`BELOW`、`CONTAINS`、`INSIDE`、
+`OVERLAPS` 和 `ADJACENT_TO` 边，并携带关系分数与边界间距；Web 响应和
+`output/result.json` 都会包含该数组。关系推断阈值可通过
+`new SpatialRelationConfig(iou, axisOverlap, adjacencyGap)` 调整，默认值为
+`0.10`、`0.20`、`0.05`。
+
+需要独立执行关系分析或取得关系驱动阅读顺序时，可使用
+`com.example.doclayout.core.RegionAwareDataOptimizer`。它只返回新的不可变视图，
+不会修改模型检测框或 OCR 结果。
+
 Before SDK packaging, validate these semantics against a real inference result and PaddleOCR reference output.

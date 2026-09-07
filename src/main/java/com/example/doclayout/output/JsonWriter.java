@@ -2,6 +2,7 @@ package com.example.doclayout.output;
 
 import com.example.doclayout.model.LayoutBox;
 import com.example.doclayout.model.LayoutResult;
+import com.example.doclayout.model.RegionRelation;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,6 +30,18 @@ public final class JsonWriter {
             LayoutBox b = r.boxes().get(i);
             sb.append("    {\"classId\": ").append(b.classId()).append(", \"label\": \"").append(esc(b.label())).append("\"").append(", \"score\": ").append(f(b.score())).append(", \"box\": [").append(f(b.x1())).append(", ").append(f(b.y1())).append(", ").append(f(b.x2())).append(", ").append(f(b.y2())).append("]").append(", \"modelOrder\": ").append(b.modelOrder()).append(", \"order\": ").append(b.order()).append(", \"ocrText\": \"").append(esc(b.ocrText())).append("\"}");
             if (i + 1 < r.boxes().size()) sb.append(',');
+            sb.append('\n');
+        }
+        sb.append("  ],\n");
+        sb.append("  \"spatialRelations\": [\n");
+        for (int i = 0; i < r.spatialRelations().relations().size(); i++) {
+            RegionRelation relation = r.spatialRelations().relations().get(i);
+            sb.append("    {\"from\": ").append(relation.fromIndex())
+                    .append(", \"to\": ").append(relation.toIndex())
+                    .append(", \"type\": \"").append(relation.type()).append("\"")
+                    .append(", \"score\": ").append(f(relation.score()))
+                    .append(", \"distance\": ").append(f(relation.distance())).append("}");
+            if (i + 1 < r.spatialRelations().relations().size()) sb.append(',');
             sb.append('\n');
         }
         sb.append("  ]\n}\n");
