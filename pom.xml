@@ -4,6 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.13</version>
+        <relativePath/>
+    </parent>
+
     <groupId>com.example</groupId>
     <artifactId>pp-doclayout-java-test</artifactId>
     <version>0.1.0-SNAPSHOT</version>
@@ -25,10 +32,33 @@
             <version>${onnxruntime.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>6.0.1</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- Explicitly declared because web controllers use Spring's stereotype annotations. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.mymonstercat</groupId>
+            <artifactId>rapidocr</artifactId>
+            <version>0.0.7</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.mymonstercat</groupId>
+            <artifactId>rapidocr-ncnn-platform</artifactId>
+            <version>0.0.7</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.mymonstercat</groupId>
+            <artifactId>rapidocr-onnx-platform</artifactId>
+            <version>0.0.7</version>
         </dependency>
     </dependencies>
 
@@ -59,6 +89,10 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.5.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

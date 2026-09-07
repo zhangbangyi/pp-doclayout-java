@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PP-DocLayoutV3</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+            color: #17202a;
+            background: #f4f6f8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        main {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 40px 28px 56px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #dce3e9;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        p {
+            margin: 9px 0 0;
+            color: #617080;
+            line-height: 1.6;
+        }
+
+        .state {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #1c6b44;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #24955d;
+            box-shadow: 0 0 0 4px #24955d1f;
+        }
+
+        section {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 18px;
+            margin-top: 28px;
+        }
+
+        article {
+            background: #fff;
+            border: 1px solid #dce3e9;
+            border-radius: 8px;
+            padding: 22px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 650;
+        }
+
+        .path {
+            display: block;
+            margin-top: 16px;
+            padding: 13px 14px;
+            border-left: 3px solid #1f7a4d;
+            background: #f1f8f4;
+            color: #174c33;
+            font-family: Consolas, monospace;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        ul {
+            margin: 16px 0 0;
+            padding-left: 20px;
+            color: #4f5f6f;
+            line-height: 1.9;
+        }
+
+        code {
+            font-family: Consolas, monospace;
+            font-size: 0.92em;
+            color: #23476a;
+        }
+
+        footer {
+            margin-top: 24px;
+            color: #718093;
+            font-size: 13px;
+        }
+
+        @media (max-width: 720px) {
+            main {
+                padding: 28px 16px 40px;
+            }
+
+            header {
+                display: block;
+            }
+
+            .state {
+                margin-top: 16px;
+            }
+
+            section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <header>
+        <div>
+            <h1>PP-DocLayoutV3</h1>
+            <p>版面识别服务</p>
+        </div>
+        <div class="state"><span class="dot"></span>服务运行中</div>
+    </header>
+    <section>
+        <article>
+            <h2>Web 入口</h2>
+            <p>Spring Boot 已提供根路径页面。模型推理命令行入口与原有输出流程均保持可用。</p>
+            <span class="path">http://localhost:8098/</span>
+        </article>
+        <article>
+            <h2>本地资源</h2>
+            <ul>
+                <li>模型：<code>models/inference.onnx</code></li>
+                <li>输入图像：<code>img.png</code></li>
+                <li>推理结果：<code>output/index.html</code></li>
+            </ul>
+        </article>
+    </section>
+    <footer>关闭 Spring Boot 进程后，Web 服务将停止。</footer>
+</main>
+</body>
+</html>

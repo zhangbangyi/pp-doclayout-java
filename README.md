@@ -1,15 +1,18 @@
 # PP-DocLayoutV3 Java Demo
 
-这是一个基于 Java 17 和 ONNX Runtime 的 PP-DocLayoutV3 推理示例项目，包含命令行推理、结果 JSON、框线图片和可视化 HTML 页面。
+这是一个基于 Java 17、Spring Boot 和 ONNX Runtime 的 PP-DocLayoutV3 单体 Web 应用，保留命令行推理、结果 JSON、框线图片和可视化 HTML 页面。
 
 ## 项目结构
 
 ```text
 src/main/java/com/example/doclayout/
+  DocLayoutApplication.java         Spring Boot 启动入口
   cli/                         命令行入口（Main、BenchmarkMain）
   core/                        ONNX 推理、模型检查、图像预处理
   model/                       版面框、识别结果、标签领域对象
   output/                      JSON、框线图片和 HTML 报告输出
+  web/                         Web 首页与默认浏览器启动逻辑
+src/main/resources/static/     Web 首页 index.html
 src/test/java/                 与生产包结构对应的单元测试
 models/                        本地模型目录（模型文件不提交到 Git）
 output/                        推理生成目录（自动生成，不提交到 Git）
@@ -60,7 +63,21 @@ Recommended image types:
 - report/document page
 - screenshot containing title, text, table and image
 
-## Run
+## Run Web application
+
+启动 Web 服务：
+
+    mvn spring-boot:run
+
+服务启动成功后会自动使用系统默认浏览器打开：
+
+    http://localhost:8098/
+
+需要在无图形界面的环境中运行时，可关闭自动打开浏览器：
+
+    mvn spring-boot:run -Dspring-boot.run.arguments="--app.browser.auto-open=false"
+
+## Run command-line inference
 
 First inspect and infer:
 
