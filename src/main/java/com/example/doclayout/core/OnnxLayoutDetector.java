@@ -153,7 +153,7 @@ public final class OnnxLayoutDetector implements AutoCloseable {
             // PaddleX 使用严格大于阈值的规则，并排除无效类别。
             if (score <= scoreThreshold || classId < 0) continue;
             out.add(new LayoutBox(classId, Labels.of(classId), score,
-                    x1, y1, x2, y2, modelOrder, 0, null));
+                    x1, y1, x2, y2, modelOrder, 0, "", null));
         }
         // 官方后处理会先按模型顺序排序，再为正文区域编排连续的阅读顺序。
         out.sort(Comparator.comparingLong(LayoutBox::modelOrder));

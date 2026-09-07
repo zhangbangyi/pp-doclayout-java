@@ -27,7 +27,7 @@ public final class JsonWriter {
         sb.append("  \"boxes\": [\n");
         for (int i = 0; i < r.boxes().size(); i++) {
             LayoutBox b = r.boxes().get(i);
-            sb.append("    {\"classId\": ").append(b.classId()).append(", \"label\": \"").append(esc(b.label())).append("\"").append(", \"score\": ").append(f(b.score())).append(", \"box\": [").append(f(b.x1())).append(", ").append(f(b.y1())).append(", ").append(f(b.x2())).append(", ").append(f(b.y2())).append("]").append(", \"modelOrder\": ").append(b.modelOrder()).append(", \"order\": ").append(b.order()).append("}");
+            sb.append("    {\"classId\": ").append(b.classId()).append(", \"label\": \"").append(esc(b.label())).append("\"").append(", \"score\": ").append(f(b.score())).append(", \"box\": [").append(f(b.x1())).append(", ").append(f(b.y1())).append(", ").append(f(b.x2())).append(", ").append(f(b.y2())).append("]").append(", \"modelOrder\": ").append(b.modelOrder()).append(", \"order\": ").append(b.order()).append(", \"ocrText\": \"").append(esc(b.ocrText())).append("\"}");
             if (i + 1 < r.boxes().size()) sb.append(',');
             sb.append('\n');
         }

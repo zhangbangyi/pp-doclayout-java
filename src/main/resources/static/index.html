@@ -261,6 +261,17 @@
             white-space: nowrap;
         }
 
+        td.ocr-text {
+            min-width: 240px;
+            max-width: 560px;
+            white-space: pre-wrap;
+            line-height: 1.55;
+        }
+
+        .muted {
+            color: #8a95a3;
+        }
+
         th {
             background: #fafbfc;
             color: #697586;
@@ -353,6 +364,7 @@
                         <th>类别</th>
                         <th>置信度</th>
                         <th>坐标</th>
+                        <th>识别文本</th>
                     </tr>
                     </thead>
                     <tbody id="detailsBody"></tbody>
@@ -441,7 +453,8 @@
         document.getElementById('emptyDetails').style.display = result.boxes.length ? 'none' : 'block';
         result.boxes.forEach((box, index) => {
             const row = document.createElement('tr');
-            row.innerHTML = '<td>' + (index + 1) + '</td><td>' + escapeHtml(box.label) + '</td><td class="score">' + box.score.toFixed(3) + '</td><td>[' + [box.x1, box.y1, box.x2, box.y2].map(value => value.toFixed(1)).join(', ') + ']</td>';
+            const text = box.ocrText ? escapeHtml(box.ocrText).replace(/\n/g, '<br>') : '<span class="muted">无文本</span>';
+            row.innerHTML = '<td>' + (index + 1) + '</td><td>' + escapeHtml(box.label) + '</td><td class="score">' + box.score.toFixed(3) + '</td><td>[' + [box.x1, box.y1, box.x2, box.y2].map(value => value.toFixed(1)).join(', ') + ']</td><td class="ocr-text">' + text + '</td>';
             body.appendChild(row);
         });
         document.getElementById('results').classList.add('visible');

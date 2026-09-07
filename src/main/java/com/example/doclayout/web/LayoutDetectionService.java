@@ -1,6 +1,7 @@
 package com.example.doclayout.web;
 
 import com.example.doclayout.core.OnnxLayoutDetector;
+import com.example.doclayout.model.LayoutBox;
 import com.example.doclayout.model.LayoutResult;
 import com.example.doclayout.output.Visualizer;
 import java.awt.image.BufferedImage;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
+import java.util.List;
 import javax.imageio.ImageIO;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,16 +25,19 @@ public class LayoutDetectionService {
     private final Path modelPath;
     private final int intraThreads;
     private final int interThreads;
+    private final RapidOcrService rapidOcrService;
     private OnnxLayoutDetector detector;
 
     public LayoutDetectionService(
             @Value("${app.model-path:models/inference.onnx}") String modelPath,
             @Value("${app.intra-threads:2}") int intraThreads,
-            @Value("${app.inter-threads:1}") int interThreads) {
+            @Value("${app.inter-threads:1}") int interThreads,
+            RapidOcrService rapidOcrService) {
         // 配置先保存为轻量字段，模型文件和 native 资源留到真正识别时再初始化。
         this.modelPath = Path.of(modelPath);
         this.intraThreads = intraThreads;
         this.interThreads = interThreads;
+        this.rapidOcrService = rapidOcrService;
     }
 
     /** 执行一次识别并返回原图、标注图和结构化结果。 */
@@ -41,7 +46,12 @@ public class LayoutDetectionService {
         if (threshold < 0 || threshold > 1) {
             throw new IllegalArgumentException("置信度阈值必须在 0 到 1 之间");
         }
-        LayoutResult result = detector().detect(original, threshold);
+        LayoutResult detected = detector().detect(original, threshold);
+        List<LayoutBox> boxes = rapidOcrService.recognize(original, detected.boxes());
+        LayoutResult result = new LayoutResult(detected.originalWidth(), detected.originalHeight(),
+                detected.inputWidth(), detected.inputHeight(), detected.preprocessNanos(),
+                detected.inferenceNanos(), detected.postprocessNanos(), boxes,
+                detected.outputNames(), detected.modelVersion());
         // 浏览器直接消费 Base64 data URI，不需要额外的静态文件接口。
         BufferedImage annotated = Visualizer.render(original, result);
         return new DetectionPayload(dataUri(original, "png"), dataUri(annotated, "jpeg"), result);
